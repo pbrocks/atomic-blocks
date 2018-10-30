@@ -48,7 +48,7 @@ class ABAccordionBlock extends Component {
 				<BlockControls key="controls">
 					<AlignmentToolbar
 						value={ accordionAlignment }
-						onChange={ ( value ) => this.props.setAttributes( { accordionAlignment: value } ) }
+						onChange={ ( value ) => this.props.setAttributes( { accordionAlignment } ) }
 					/>
 				</BlockControls>
 			),
@@ -65,7 +65,7 @@ class ABAccordionBlock extends Component {
 					placeholder={ __( 'Accordion Title' ) }
 					value={ accordionTitle }
 					className='ab-accordion-title'
-					onChange={ ( value ) => this.props.setAttributes( { accordionTitle: value } ) }
+					onChange={ ( value ) => this.props.setAttributes( { accordionTitle } ) }
 				/>
 				
 				<RichText
@@ -76,7 +76,7 @@ class ABAccordionBlock extends Component {
 					keepPlaceholderOnFocus
 					formattingControls={ [ 'bold', 'italic', 'strikethrough', 'link' ] }
 					className='ab-accordion-text'
-					onChange={ ( value ) => this.props.setAttributes( { accordionText: value } ) }
+					onChange={ ( value ) => this.props.setAttributes( { accordionText } ) }
 				/>
 			</Accordion>
 		];
