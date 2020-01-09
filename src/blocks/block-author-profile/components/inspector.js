@@ -1,30 +1,31 @@
 /**
- * Inspector Controls
+ * Inspector Controls.
  */
 
-// Setup the block
+/**
+ * Internal dependencies.
+ */
+import RenderSettingControl from '../../../utils/components/settings/renderSettingControl';
+
+/* Setup the block. */
 const { __ } = wp.i18n;
 const { Component } = wp.element;
 
-// Import block components
+/* Import block components. */
 const {
 	InspectorControls,
-	BlockDescription,
-	ColorPalette,
-} = wp.blocks;
+	PanelColorSettings
+} = wp.editor;
 
-// Import Inspector components
+/* Import Inspector components. */
 const {
-	Panel,
 	PanelBody,
-	PanelRow,
-	PanelColor,
-	RangeControl, 
+	RangeControl,
 	SelectControl,
-	TextControl,
+	TextControl
 } = wp.components;
 
-// Create an Inspector Controls wrapper Component
+/* Create an Inspector Controls wrapper Component. */
 export default class Inspector extends Component {
 
 	constructor( props ) {
@@ -33,138 +34,168 @@ export default class Inspector extends Component {
 
 	render() {
 
-		// Setup the attributes
-		const { profileName, profileTitle, profileContent, profileAlignment, profileImgURL, profileImgID, profileFontSize, profileBackgroundColor, profileTextColor, profileLinkColor, twitter, facebook, instagram, pinterest, google, youtube, github, email, website, profileAvatarShape  } = this.props.attributes;
+		/* Setup the attributes. */
+		const { profileFontSize, profileBackgroundColor, profileTextColor, profileLinkColor, twitter, facebook, instagram, pinterest, google, youtube, github, linkedin, wordpress, email, website, profileAvatarShape  } = this.props.attributes;
+		const { setAttributes } = this.props;
 
-		// Avatar shape options
+		/* Avatar shape options. */
 		const profileAvatarShapeOptions = [
-			{ value: 'square', label: __( 'Square' ) },
-			{ value: 'round', label: __( 'Round' ) },
+			{ value: 'square', label: __( 'Square', 'atomic-blocks' ) },
+			{ value: 'round', label: __( 'Round', 'atomic-blocks' ) }
 		];
+
+		/* Update color values. */
+		const onChangeBackgroundColor = value => setAttributes({ profileBackgroundColor: value });
+		const onChangeProfileTextColor = value => setAttributes({ profileTextColor: value });
+		const onChangeSocialLinkColor = value => setAttributes({ profileLinkColor: value });
 
 		return (
 		<InspectorControls key="inspector">
+			<PanelBody>
+				<RenderSettingControl id="ab_author_profile_profileFontSize">
+					<RangeControl
+						label={ __( 'Font Size', 'atomic-blocks' ) }
+						value={ profileFontSize }
+						onChange={ ( value ) => this.props.setAttributes({ profileFontSize: value }) }
+						min={ 14 }
+						max={ 24 }
+						step={ 1 }
+					/>
+				</RenderSettingControl>
 
-			<RangeControl
-				label={ __( 'Font Size' ) }
-				value={ profileFontSize }
-				onChange={ ( value ) => this.props.setAttributes( { profileFontSize: value } ) }
-				min={ 14 }
-				max={ 24 }
-				step={ 1 }
-			/>
+				<RenderSettingControl id="ab_author_profile_profileAvatarShape">
+					<SelectControl
+						label={ __( 'Avatar Shape', 'atomic-blocks' ) }
+						description={ __( 'Choose between a round or square avatar shape.', 'atomic-blocks' ) }
+						options={ profileAvatarShapeOptions }
+						value={ profileAvatarShape }
+						onChange={ ( value ) => this.props.setAttributes({ profileAvatarShape: value }) }
+					/>
+				</RenderSettingControl>
 
-			<SelectControl
-				label={ __( 'Avatar Shape' ) }
-				description={ __( 'Choose between a round or square avatar shape.' ) }
-				options={ profileAvatarShapeOptions }
-				value={ profileAvatarShape }
-				onChange={ ( value ) => this.props.setAttributes( { profileAvatarShape: value } ) }
-			/>
-			
-			<PanelColor 
-				title={ __( 'Background Color' ) }
-				colorValue={ profileBackgroundColor }
-				initialOpen={ false }
-			>
-				<ColorPalette 
-					label={ __( 'Background Color' ) }
-					value={ profileBackgroundColor }
-					onChange={ ( value ) => this.props.setAttributes( { profileBackgroundColor: value } ) }
-				/>
-			</PanelColor>
+				<RenderSettingControl id="ab_author_profile_profileBackgroundColor">
+					<PanelColorSettings
+						title={ __( 'Background Color', 'atomic-blocks' ) }
+						initialOpen={ false }
+						colorSettings={ [ {
+							value: profileBackgroundColor,
+							onChange: onChangeBackgroundColor,
+							label: __( 'Background Color', 'atomic-blocks' )
+						} ] }
+					>
+					</PanelColorSettings>
+				</RenderSettingControl>
 
-			<PanelColor 
-				title={ __( 'Text Color' ) }
-				colorValue={ profileTextColor }
-				initialOpen={ false }
-			>
-				<ColorPalette 
-					label={ __( 'Background Color' ) }
-					value={ profileTextColor }
-					onChange={ ( value ) => this.props.setAttributes( { profileTextColor: value } ) }
-				/>
-			</PanelColor>
+				<RenderSettingControl id="ab_author_profile_profileTextColor">
+					<PanelColorSettings
+						title={ __( 'Text Color', 'atomic-blocks' ) }
+						initialOpen={ false }
+						colorSettings={ [ {
+							value: profileTextColor,
+							onChange: onChangeProfileTextColor,
+							label: __( 'Text Color', 'atomic-blocks' )
+						} ] }
+					>
+					</PanelColorSettings>
+				</RenderSettingControl>
 
-			<PanelColor 
-				title={ __( 'Social Link Color' ) }
-				colorValue={ profileLinkColor }
-				initialOpen={ false }
-			>
-				<ColorPalette 
-					label={ __( 'Link Color' ) }
-					value={ profileLinkColor }
-					onChange={ ( value ) => this.props.setAttributes( { profileLinkColor: value } ) }
-					colors={['#392F43', '#3373dc', '#2DBAA3', '#209cef', '#2BAD59', '#ff3860', '#7941b6', '#F7812B']}
-				/>
-			</PanelColor>
-			
-			<h2>{ __( 'Social Links' ) }</h2>
-			<p>{ __( 'Add links to your social media site and they will appear in the bottom of the profile box.' ) }</p>
+				<RenderSettingControl id="ab_author_profile_profileLinkColor">
+					<PanelColorSettings
+						title={ __( 'Social Link Color', 'atomic-blocks' ) }
+						initialOpen={ false }
+							colorSettings={ [ {
+							value: profileLinkColor,
+							onChange: onChangeSocialLinkColor,
+							label: __( 'Social Link Color', 'atomic-blocks' )
+						} ] }
+					>
+					</PanelColorSettings>
+				</RenderSettingControl>
+			</PanelBody>
 
-			<TextControl
-				label={ __( 'Twitter URL' ) }
-				type="url"
-				value={ twitter }
-				onChange={ ( value ) => this.props.setAttributes( { twitter: value } ) }
-			/>
+			<RenderSettingControl id="ab_author_profile_socialLinks">
+				<PanelBody title={ __( 'Social Links', 'atomic-blocks' ) } initialOpen={ false }>
+					<p>{ __( 'Add links to your social media site and they will appear in the bottom of the profile box.', 'atomic-blocks' ) }</p>
 
-			<TextControl
-				label={ __( 'Facebook URL' ) }
-				type="url"
-				value={ facebook }
-				onChange={ ( value ) => this.props.setAttributes( { facebook: value } ) }
-			/>
+					<TextControl
+						label={ __( 'Twitter URL', 'atomic-blocks' ) }
+						type="url"
+						value={ twitter }
+						onChange={ ( value ) => this.props.setAttributes({ twitter: value }) }
+					/>
 
-			<TextControl
-				label={ __( 'Instagram URL' ) }
-				type="url"
-				value={ instagram }
-				onChange={ ( value ) => this.props.setAttributes( { instagram: value } ) }
-			/>
+					<TextControl
+						label={ __( 'Facebook URL', 'atomic-blocks' ) }
+						type="url"
+						value={ facebook }
+						onChange={ ( value ) => this.props.setAttributes({ facebook: value }) }
+					/>
 
-			<TextControl
-				label={ __( 'Pinterest URL' ) }
-				type="url"
-				value={ pinterest }
-				onChange={ ( value ) => this.props.setAttributes( { pinterest: value } ) }
-			/>
+					<TextControl
+						label={ __( 'Instagram URL', 'atomic-blocks' ) }
+						type="url"
+						value={ instagram }
+						onChange={ ( value ) => this.props.setAttributes({ instagram: value }) }
+					/>
 
-			<TextControl
-				label={ __( 'Google URL' ) }
-				type="url"
-				value={ google }
-				onChange={ ( value ) => this.props.setAttributes( { google: value } ) }
-			/>
+					<TextControl
+						label={ __( 'Pinterest URL', 'atomic-blocks' ) }
+						type="url"
+						value={ pinterest }
+						onChange={ ( value ) => this.props.setAttributes({ pinterest: value }) }
+					/>
 
-			<TextControl
-				label={ __( 'YouTube URL' ) }
-				type="url"
-				value={ youtube }
-				onChange={ ( value ) => this.props.setAttributes( { youtube: value } ) }
-			/>
+					<TextControl
+						label={ __( 'Google URL', 'atomic-blocks' ) }
+						type="url"
+						value={ google }
+						onChange={ ( value ) => this.props.setAttributes({ google: value }) }
+					/>
 
-			<TextControl
-				label={ __( 'Github URL' ) }
-				type="url"
-				value={ github }
-				onChange={ ( value ) => this.props.setAttributes( { github: value } ) }
-			/>
+					<TextControl
+						label={ __( 'YouTube URL', 'atomic-blocks' ) }
+						type="url"
+						value={ youtube }
+						onChange={ ( value ) => this.props.setAttributes({ youtube: value }) }
+					/>
 
-			<TextControl
-				label={ __( 'Email URL' ) }
-				type="url"
-				value={ email }
-				onChange={ ( value ) => this.props.setAttributes( { email: value } ) }
-			/>
+					<TextControl
+						label={ __( 'Github URL', 'atomic-blocks' ) }
+						type="url"
+						value={ github }
+						onChange={ ( value ) => this.props.setAttributes({ github: value }) }
+					/>
 
-			<TextControl
-				label={ __( 'Website URL' ) }
-				type="url"
-				value={ website }
-				onChange={ ( value ) => this.props.setAttributes( { website: value } ) }
-			/>	
+					<TextControl
+						label={ __( 'LinkedIn URL', 'atomic-blocks' ) }
+						type="url"
+						value={ linkedin }
+						onChange={ ( value ) => this.props.setAttributes({ linkedin: value }) }
+					/>
 
+					<TextControl
+						label={ __( 'WordPress Profile URL', 'atomic-blocks' ) }
+						type="url"
+						value={ wordpress }
+						onChange={ ( value ) => this.props.setAttributes({ wordpress: value }) }
+					/>
+
+					<TextControl
+						label={ __( 'Email URL', 'atomic-blocks' ) }
+						help={ __( 'Supports a URL or an email link. Email links must be prefixed with "mailto:". Example: mailto:test@example.com', 'atomic-blocks' ) }
+						type="url"
+						value={ email }
+						onChange={ ( value ) => this.props.setAttributes({ email: value }) }
+					/>
+
+					<TextControl
+						label={ __( 'Website URL', 'atomic-blocks' ) }
+						type="url"
+						value={ website }
+						onChange={ ( value ) => this.props.setAttributes({ website: value }) }
+					/>
+				</PanelBody>
+			</RenderSettingControl>
 		</InspectorControls>
 		);
 	}

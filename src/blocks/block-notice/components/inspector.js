@@ -2,27 +2,26 @@
  * Inspector Controls
  */
 
+/**
+ * Internal dependencies.
+ */
+import RenderSettingControl from '../../../utils/components/settings/renderSettingControl';
+
 // Setup the block
 const { __ } = wp.i18n;
 const { Component } = wp.element;
 
 // Import block components
 const {
-  InspectorControls,
-  BlockDescription,
-  ColorPalette,
-} = wp.blocks;
+  PanelColorSettings,
+  InspectorControls
+} = wp.editor;
 
 // Import Inspector components
 const {
-	Toolbar,
-	Button,
 	PanelBody,
-	PanelRow,
-	PanelColor,
-	FormToggle,
-	RangeControl, 
-	SelectControl,
+	RangeControl,
+	SelectControl
 } = wp.components;
 
 /**
@@ -38,72 +37,92 @@ export default class Inspector extends Component {
 
 		// Notice dismiss options
 		const noticeDismissOptions = [
-			{ value: '', label: __( 'Always Show' ) },
-			{ value: 'ab-dismissable', label: __( 'Dismissable' ) },
+			{ value: null, label: __( 'Always Show', 'atomic-blocks' ) },
+			{ value: 'ab-dismissable', label: __( 'Dismissible', 'atomic-blocks' ) }
+		];
+
+		// Notice colors
+		const noticeColors = [
+			{ color: '#00d1b2', name: 'teal' },
+			{ color: '#3373dc', name: 'royal blue' },
+			{ color: '#209cef', name: 'sky blue' },
+			{ color: '#22d25f', name: 'green' },
+			{ color: '#ffdd57', name: 'yellow' },
+			{ color: '#ff3860', name: 'pink' },
+			{ color: '#7941b6', name: 'purple' },
+			{ color: '#392F43', name: 'black' }
 		];
 
 		// Setup the attributes
-		const { attributes: { noticeTitle, noticeContent, noticeAlignment, noticeBackgroundColor, noticeTextColor, noticeTitleColor, noticeFontSize, noticeDismiss } } = this.props;
+		const { attributes: { noticeBackgroundColor, noticeTextColor, noticeTitleColor, noticeFontSize, noticeDismiss } } = this.props;
+		const { setAttributes } = this.props;
+
+		// Update color values
+		const onChangeBackgroundColor = value => setAttributes({ noticeBackgroundColor: value });
+		const onChangeTextColor = value => setAttributes({ noticeTextColor: value });
+		const onChangeTitleColor = value => setAttributes({ noticeTitleColor: value });
 
 		return (
 		<InspectorControls key="inspector">
+			<PanelBody>
+				<RenderSettingControl id="ab_notice_noticeFontSize">
+					<RangeControl
+						label={ __( 'Font Size', 'atomic-blocks' ) }
+						value={ noticeFontSize }
+						onChange={ ( value ) => this.props.setAttributes({ noticeFontSize: value }) }
+						min={ 14 }
+						max={ 24 }
+						step={ 1 }
+					/>
+				</RenderSettingControl>
 
-			<RangeControl
-				label={ __( 'Font Size' ) }
-				value={ noticeFontSize }
-				onChange={ ( value ) => this.props.setAttributes( { noticeFontSize: value } ) }
-				min={ 14 }
-				max={ 24 }
-				step={ 1 }
-			/>
+				<RenderSettingControl id="ab_notice_noticeDismiss">
+					<SelectControl
+						label={ __( 'Notice Display', 'atomic-blocks' ) }
+						description={ __( 'Do you want the message to always show or dismissible?', 'atomic-blocks' ) }
+						options={ noticeDismissOptions }
+						value={ noticeDismiss }
+						onChange={ ( value ) => this.props.setAttributes({ noticeDismiss: value }) }
+					/>
+				</RenderSettingControl>
+			</PanelBody>
+			<RenderSettingControl id="ab_notice_colorSettings">
+				<PanelColorSettings
+					title={ __( 'Notice Color', 'atomic-blocks' ) }
+					colorValue={ noticeBackgroundColor }
+					initialOpen={ false }
+					colorSettings={ [ {
+						value: noticeBackgroundColor,
+						onChange: onChangeBackgroundColor,
+						colors: noticeColors,
+						label: __( 'Notice Color', 'atomic-blocks' )
+					} ] }
+				>
+				</PanelColorSettings>
 
-			<SelectControl
-				label={ __( 'Notice Display' ) }
-				description={ __( 'Do you want the message to always show or dismissable?' ) }
-				options={ noticeDismissOptions }
-				value={ noticeDismiss }
-				onChange={ ( value ) => this.props.setAttributes( { noticeDismiss: value } ) }
-			/>
-			
-			<PanelColor 
-				title={ __( 'Notice Color' ) }
-				colorValue={ noticeBackgroundColor }
-				initialOpen={ false }
-			>
-				<ColorPalette
-					label={ __( 'Notice Color' ) }
-					value={ noticeBackgroundColor }
-					onChange={ ( value ) => this.props.setAttributes( { noticeBackgroundColor: value } ) }
-					colors={['#00d1b2', '#3373dc', '#209cef', '#22d25f', '#ffdd57', '#ff3860', '#7941b6', '#392F43']}
-				/>
-			</PanelColor>
+				<PanelColorSettings
+					title={ __( 'Title Color', 'atomic-blocks' ) }
+					initialOpen={ false }
+					colorSettings = { [ {
+						value: noticeTitleColor,
+						onChange: onChangeTitleColor,
+						label: __( 'Title Color', 'atomic-blocks' )
+					} ] }
+				>
+				</PanelColorSettings>
 
-			<PanelColor 
-				title={ __( 'Title Color' ) }
-				colorValue={ noticeTitleColor }
-				initialOpen={ false }
-			>
-				<ColorPalette 
-					label={ __( 'Title Color' ) }
-					value={ noticeTitleColor }
-					onChange={ ( value ) => this.props.setAttributes( { noticeTitleColor: value } ) }
-					colors={['#fff', '#32373c' ]}
-				/>
-			</PanelColor>
-			
-			<PanelColor 
-				title={ __( 'Text Color' ) }
-				colorValue={ noticeTextColor }
-				initialOpen={ false }
-			>
-				<ColorPalette 
-					label={ __( 'Background Color' ) }
-					value={ noticeTextColor }
-					onChange={ ( value ) => this.props.setAttributes( { noticeTextColor: value } ) }
-					colors={['#32373c', '#fff' ]}
-				/>
-			</PanelColor>
-
+				<PanelColorSettings
+					title={ __( 'Text Color', 'atomic-blocks' ) }
+					colorValue={ noticeTextColor }
+					initialOpen={ false }
+					colorSettings = { [ {
+						value: noticeTextColor,
+						onChange: onChangeTextColor,
+						label: __( 'Text Color', 'atomic-blocks' )
+					} ] }
+				>
+				</PanelColorSettings>
+			</RenderSettingControl>
 		</InspectorControls>
 		);
 	}

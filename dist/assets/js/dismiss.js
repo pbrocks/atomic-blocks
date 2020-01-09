@@ -1,19 +1,27 @@
-(function($) {
+/**
+ * Handles dismissible notices from the Notice block.
+ */
 
-	$(document).ready(function() {
+document.addEventListener( 'DOMContentLoaded', function() {
 
-		const elems = document.querySelectorAll('.ab-block-notice.ab-dismissable[data-id]');
-		elems.forEach(el => {
-			const uid = el.getAttribute( 'data-id' );
-			if ( ! localStorage.getItem(`notice-${uid}`) ) {
-				el.style.display = 'block';
-			}
-			el.querySelector('.ab-notice-dismiss').addEventListener('click', () => {
-				localStorage.setItem(`notice-${uid}`, 1);
-				el.style.display = '';
-			})
-		})
+	var notices = document.querySelectorAll( '.ab-block-notice.ab-dismissable[data-id]' );
 
+	notices.forEach( function( element ) {
+
+		var uid = element.getAttribute( 'data-id' );
+
+		var dismissible = element.querySelector( '.ab-notice-dismiss' );
+
+		if ( ! localStorage.getItem( 'notice-' + uid ) ) {
+			element.style.display = 'block';
+		}
+
+		if ( dismissible ) {
+			dismissible.addEventListener( 'click', function( event ) {
+				event.preventDefault();
+				localStorage.setItem( 'notice-' + uid, '1' );
+				element.style.display = '';
+			});
+		}
 	});
-
-})(jQuery);
+});

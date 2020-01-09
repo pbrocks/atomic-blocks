@@ -23,22 +23,22 @@ export default class NoticeBox extends Component {
 		// Setup the attributes
 		const { attributes: { noticeTitle, noticeAlignment, noticeBackgroundColor, noticeTextColor, noticeFontSize, noticeDismiss } } = this.props;
 
-		// Generate a unique ID for the dismissable notice
-		const blockID = uniqueID.generateUniqueID( noticeDismiss + noticeTitle )
+		// Generate a unique ID for the dismissible notice
+		const blockID = uniqueID.generateUniqueID( noticeDismiss + noticeTitle );
 
-		return (	
-			<div 
+		return (
+			<div
 				style={ {
 					color: noticeTextColor,
 					textAlign: noticeAlignment,
-					backgroundColor: noticeBackgroundColor,
+					backgroundColor: noticeBackgroundColor
 				} }
 				className={ classnames(
 					this.props.className,
 					noticeDismiss,
 					'ab-font-size-' + noticeFontSize,
 					'ab-block-notice'
-				) 
+				)
 				}
 				data-id={ blockID }
 			>

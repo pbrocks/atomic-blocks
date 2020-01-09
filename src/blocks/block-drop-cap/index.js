@@ -6,7 +6,6 @@
 import classnames from 'classnames';
 import Inspector from './components/inspector';
 import DropCap from './components/dropcap';
-import icons from './components/icons';
 
 // Import CSS
 import './styles/style.scss';
@@ -18,59 +17,52 @@ const { __ } = wp.i18n;
 // Extend component
 const { Component } = wp.element;
 
-// Register block controls
-const { 
-	registerBlockType,
+// Register block
+const { registerBlockType } = wp.blocks;
+
+// Register editor components
+const {
 	RichText,
 	AlignmentToolbar,
-	BlockControls,
-	BlockAlignmentToolbar,
-	MediaUpload,
-} = wp.blocks;
-
-// Register components
-const {
-	Button,
-	SelectControl,
-} = wp.components;
+	BlockControls
+} = wp.editor;
 
 class ABDropCapBlock extends Component {
-	
+
 	render() {
 
 		// Setup the attributes
-		const { attributes: { dropCapContent, dropCapAlignment, dropCapBackgroundColor, dropCapTextColor, dropCapFontSize, dropCapStyle }, isSelected, className, setAttributes } = this.props;
+		const { attributes: { dropCapContent, dropCapAlignment, dropCapFontSize }  } = this.props;
 
 		return [
+
 			// Show the alignment toolbar on focus
-			isSelected && (
-				<BlockControls key="controls">
-					<AlignmentToolbar
-						value={ dropCapAlignment }
-						onChange={ ( value ) => this.props.setAttributes( { dropCapAlignment: value } ) }
-					/>
-				</BlockControls>
-			),
-			// Show the block controls on focus
-			isSelected && (
-				<Inspector
-					{ ...this.props }
+			<BlockControls key="controls">
+				<AlignmentToolbar
+					value={ dropCapAlignment }
+					onChange={ ( value ) => this.props.setAttributes({ dropCapAlignment: value }) }
 				/>
-			),
+			</BlockControls>,
+
+			// Show the block controls on focus
+			<Inspector
+				{ ...this.props }
+			/>,
+
 			// Show the block markup in the editor
 			<DropCap { ...this.props }>
 				<RichText
 					tagName="div"
 					multiline="p"
-					placeholder={ __( 'Add paragraph text...' ) }
-					value={ dropCapContent }
-					isSelected={ isSelected }
+					placeholder={ __( 'Add paragraph text...', 'atomic-blocks' ) }
 					keepPlaceholderOnFocus
+					value={ dropCapContent }
 					formattingControls={ [ 'bold', 'italic', 'strikethrough', 'link' ] }
 					className={ classnames(
 						'ab-drop-cap-text',
+						'ab-font-size-' + dropCapFontSize,
 					) }
-					onChange={ ( value ) => this.props.setAttributes( { dropCapContent: value } ) }
+					onChange={ ( value ) => this.props.setAttributes({ dropCapContent: value }) }
 				/>
 			</DropCap>
 		];
@@ -79,23 +71,23 @@ class ABDropCapBlock extends Component {
 
 // Register the block
 registerBlockType( 'atomic-blocks/ab-drop-cap', {
-	title: __( 'AB Drop Cap' ),
-	description: __( 'Add a styled drop cap to the beginning of your paragraph.' ),
+	title: __( 'AB Drop Cap', 'atomic-blocks' ),
+	description: __( 'Add a styled drop cap to the beginning of your paragraph.', 'atomic-blocks' ),
 	icon: 'format-quote',
-	category: 'common',
+	category: 'atomic-blocks',
 	keywords: [
-		__( 'drop cap' ),
-		__( 'quote' ),
-		__( 'atomic' ),
+		__( 'drop cap', 'atomic-blocks' ),
+		__( 'quote', 'atomic-blocks' ),
+		__( 'atomic', 'atomic-blocks' )
 	],
 	attributes: {
 		dropCapContent: {
 			type: 'array',
 			selector: '.ab-drop-cap-text',
-			source: 'children',
+			source: 'children'
 		},
 		dropCapAlignment: {
-			type: 'string',
+			type: 'string'
 		},
 		dropCapBackgroundColor: {
 			type: 'string',
@@ -107,13 +99,22 @@ registerBlockType( 'atomic-blocks/ab-drop-cap', {
 		},
 		dropCapFontSize: {
 			type: 'number',
-			default: 3,
+			default: 3
 		},
 		dropCapStyle: {
             type: 'string',
-            default: 'drop-cap-letter',
-        },
+            default: 'drop-cap-letter'
+        }
 	},
+
+	ab_settings_data: {
+        ab_dropcap_dropCapFontSize: {
+            title: __( 'Drop Cap Size', 'atomic-blocks' )
+        },
+        ab_dropcap_dropCapStyle: {
+            title: __( 'Drop Cap Style', 'atomic-blocks' )
+		}
+    },
 
 	// Render the block components
 	edit: ABDropCapBlock,
@@ -121,22 +122,20 @@ registerBlockType( 'atomic-blocks/ab-drop-cap', {
 	// Save the attributes and markup
 	save: function( props ) {
 
-		const { dropCapContent, dropCapAlignment, dropCapBackgroundColor, dropCapTextColor, dropCapFontSize, dropCapStyle } = props.attributes;
+		const { dropCapContent } = props.attributes;
 
 		// Save the block markup for the front end
 		return (
 			<DropCap { ...props }>
 				{	// Check if there is text and output
 					dropCapContent && (
-					<div
-					className={ classnames(
-						'ab-drop-cap-text'
-					) }
-					>
-						{ dropCapContent }
-					</div>
-				) }	
+					<RichText.Content
+						tagName="div"
+						className="ab-drop-cap-text"
+						value={ dropCapContent }
+					/>
+				) }
 			</DropCap>
 		);
-	},
-} );
+	}
+});

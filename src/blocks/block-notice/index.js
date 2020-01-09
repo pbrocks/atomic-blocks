@@ -8,96 +8,94 @@ import Inspector from './components/inspector';
 import NoticeBox from './components/notice';
 import DismissButton from './components/button';
 import icons from './components/icons';
-import * as uniqueID from './../../utils/helper';
-import md5 from 'md5';
 
 // Import CSS
 import './styles/style.scss';
 import './styles/editor.scss';
 
 // Internationalization
-const { __ } = wp.i18n; 
+const { __ } = wp.i18n;
 
 // Extend component
 const { Component } = wp.element;
 
-// Register block controls
-const { 
-	registerBlockType,
+// Register block
+const { registerBlockType } = wp.blocks;
+
+// Register editor components
+const {
 	RichText,
 	AlignmentToolbar,
-	BlockControls,
-	BlockAlignmentToolbar,
-	MediaUpload,
-} = wp.blocks;
-
-// Register components
-const {
-	Button,
-	SelectControl,
-	withFallbackStyles,
-} = wp.components;
+	BlockControls
+} = wp.editor;
 
 class ABNoticeBlock extends Component {
-	
+
 	render() {
-		
+
 		// Setup the attributes
-		const { attributes: { noticeTitle, noticeContent, noticeAlignment, noticeBackgroundColor, noticeTextColor, noticeTitleColor, noticeFontSize, noticeDismiss }, isSelected, className, setAttributes } = this.props;
+		const {
+			attributes: {
+				noticeTitle,
+				noticeContent,
+				noticeAlignment,
+				noticeBackgroundColor,
+				noticeTitleColor,
+				noticeDismiss
+			},
+			setAttributes
+		} = this.props;
 
 		return [
+
 			// Show the alignment toolbar on focus
-			isSelected && (
-				<BlockControls key="controls">
-					<AlignmentToolbar
-						value={ noticeAlignment }
-						onChange={ ( value ) => this.props.setAttributes( { noticeAlignment: value } ) }
-					/>
-				</BlockControls>
-			),
-			// Show the block controls on focus
-			isSelected && (
-				<Inspector
-					{ ...this.props }
+			<BlockControls key="controls">
+				<AlignmentToolbar
+					value={ noticeAlignment }
+					onChange={ ( value ) => setAttributes({ noticeAlignment: value }) }
 				/>
-			),
+			</BlockControls>,
+
+			// Show the block controls on focus
+			<Inspector
+				{ ...{ setAttributes, ...this.props } }
+			/>,
+
 			// Show the block markup in the editor
 			<NoticeBox { ...this.props }>
-				{	// Check if the notice is dismissable and output the button
-					noticeDismiss && (
+				{	// Check if the notice is dismissible and output the button
+					( noticeDismiss && 'ab-dismissable' === noticeDismiss ) && (
 					<DismissButton { ...this.props }>
 						{ icons.dismiss }
 					</DismissButton>
 				) }
-				
+
 				<RichText
 					tagName="p"
-					placeholder={ __( 'Notice Title' ) }
+					placeholder={ __( 'Notice Title', 'atomic-blocks' ) }
+					keepPlaceholderOnFocus
 					value={ noticeTitle }
 					className={ classnames(
 						'ab-notice-title'
 					) }
 					style={ {
-						color: noticeTitleColor,
+						color: noticeTitleColor
 					} }
-					onChange={ ( value ) => this.props.setAttributes( { noticeTitle: value } ) }
+					onChange={ ( value ) => setAttributes({ noticeTitle: value }) }
 				/>
 
 				<RichText
 					tagName="div"
 					multiline="p"
-					placeholder={ __( 'Add notice text...' ) }
+					placeholder={ __( 'Add notice text...', 'atomic-blocks' ) }
 					value={ noticeContent }
-					isSelected={ isSelected }
-					keepPlaceholderOnFocus
-					formattingControls={ [ 'bold', 'italic', 'strikethrough', 'link' ] }
 					className={ classnames(
 						'ab-notice-text'
 					) }
 					style={ {
-						borderColor: noticeBackgroundColor,
+						borderColor: noticeBackgroundColor
 					} }
-					onChange={ ( value ) => this.props.setAttributes( { noticeContent: value } ) }
+					onChange={ ( value ) => setAttributes({ noticeContent: value }) }
 				/>
 			</NoticeBox>
 		];
@@ -106,27 +104,27 @@ class ABNoticeBlock extends Component {
 
 // Register the block
 registerBlockType( 'atomic-blocks/ab-notice', {
-	title: __( 'AB Notice' ),
-	description: __( 'Add a stylized text notice.' ),
+	title: __( 'AB Notice', 'atomic-blocks' ),
+	description: __( 'Add a stylized text notice.', 'atomic-blocks' ),
 	icon: 'format-aside',
-	category: 'common',
+	category: 'atomic-blocks',
 	keywords: [
-		__( 'notice' ),
-		__( 'message' ),
-		__( 'atomic' ),
+		__( 'notice', 'atomic-blocks' ),
+		__( 'message', 'atomic-blocks' ),
+		__( 'atomic', 'atomic-blocks' )
 	],
 	attributes: {
 		noticeTitle: {
 			type: 'string',
-			selector: '.ab-notice-title',
+			selector: '.ab-notice-title'
 		},
 		noticeContent: {
 			type: 'array',
 			selector: '.ab-notice-text',
-			source: 'children',
+			source: 'children'
 		},
 		noticeAlignment: {
-			type: 'string',
+			type: 'string'
 		},
 		noticeBackgroundColor: {
 			type: 'string',
@@ -146,9 +144,21 @@ registerBlockType( 'atomic-blocks/ab-notice', {
 		},
 		noticeDismiss: {
             type: 'string',
-            default: '',
-        },
+            default: ''
+        }
 	},
+
+	ab_settings_data: {
+        ab_notice_noticeFontSize: {
+            title: __( 'Font Size', 'atomic-blocks' )
+        },
+        ab_notice_noticeDismiss: {
+            title: __( 'Notice Display', 'atomic-blocks' )
+		},
+		ab_notice_colorSettings: {
+            title: __( 'Notice Color', 'atomic-blocks' )
+		}
+    },
 
 	// Render the block components
 	edit: ABNoticeBlock,
@@ -157,42 +167,48 @@ registerBlockType( 'atomic-blocks/ab-notice', {
 	save: function( props ) {
 
 		// Setup the attributes
-		const { noticeTitle, noticeContent, noticeAlignment, noticeBackgroundColor, noticeTextColor, noticeTitleColor, noticeFontSize, noticeDismiss } = props.attributes;
-		
+		const {
+			noticeTitle,
+			noticeContent,
+			noticeBackgroundColor,
+			noticeTitleColor,
+			noticeDismiss
+		} = props.attributes;
+
 		// Save the block markup for the front end
 		return (
-			<NoticeBox { ...props }>			
-				{	// Check if the notice is dismissable and output the button
-					noticeDismiss && (
+			<NoticeBox { ...props }>
+				{ ( noticeDismiss && 'ab-dismissable' === noticeDismiss ) && (
 					<DismissButton { ...props }>
 						{ icons.dismiss }
 					</DismissButton>
 				) }
 
-				{	// Check if there is a notice title
-					noticeTitle && (
+				{ noticeTitle && (
 					<div
-						class="ab-notice-title"
+						className="ab-notice-title"
 						style={ {
-							color: noticeTitleColor,
+							color: noticeTitleColor
 						} }
 					>
-						<p>{ noticeTitle }</p>
+						<RichText.Content
+							tagName="p"
+							value={ noticeTitle }
+						/>
 					</div>
 				) }
 
-				{	// Check if there is notice content and output
-					noticeContent && (
-					<div 
-						class="ab-notice-text" 
+				{ noticeContent && (
+					<RichText.Content
+						tagName="div"
+						className="ab-notice-text"
 						style={ {
-							borderColor: noticeBackgroundColor,
+							borderColor: noticeBackgroundColor
 						} }
-					>
-						{ noticeContent }
-					</div>
-				) }	
+						value={ noticeContent }
+					/>
+				) }
 			</NoticeBox>
 		);
-	},
-} );
+	}
+});

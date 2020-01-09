@@ -6,100 +6,96 @@
 import classnames from 'classnames';
 import Inspector from './components/inspector';
 import CustomButton from './components/button';
-import icons from './components/icons';
 
 // Import CSS
 import './styles/style.scss';
 import './styles/editor.scss';
 
 // Components
-const { __ } = wp.i18n; 
+const { __ } = wp.i18n;
 
 // Extend component
 const { Component } = wp.element;
 
-// Register block controls
-const { 
-	registerBlockType,
+// Register block
+const { registerBlockType } = wp.blocks;
+
+// Register editor components
+const {
 	RichText,
 	AlignmentToolbar,
 	BlockControls,
-	BlockAlignmentToolbar,
-	UrlInput,
-} = wp.blocks;
+	URLInput
+} = wp.editor;
 
 // Register components
 const {
-	Button,
-	withFallbackStyles,
 	IconButton,
-	Dashicon,
+	Dashicon
 } = wp.components;
 
 class ABButtonBlock extends Component {
-	
+
 	render() {
 
 		// Setup the attributes
-		const { attributes: { buttonText, buttonUrl, buttonAlignment, buttonBackgroundColor, buttonTextColor, buttonSize, buttonShape, buttonTarget }, isSelected, className, setAttributes } = this.props;
+		const { attributes: { buttonText, buttonUrl, buttonAlignment, buttonBackgroundColor, buttonTextColor, buttonSize, buttonShape }, isSelected, setAttributes } = this.props;
 
 		return [
+
 			// Show the alignment toolbar on focus
-			isSelected && (
-				<BlockControls key="controls">
-					<AlignmentToolbar
-						value={ buttonAlignment }
-						onChange={ ( value ) => {
-							setAttributes( { buttonAlignment: value } );
-						} }
-					/>
-				</BlockControls>
-			),
-			// Show the block controls on focus
-			isSelected && (
-				<Inspector
-					{ ...this.props }
+			<BlockControls key="controls">
+				<AlignmentToolbar
+					value={ buttonAlignment }
+					onChange={ ( value ) => {
+						setAttributes({ buttonAlignment: value });
+					} }
 				/>
-			),
+			</BlockControls>,
+
+			// Show the block controls on focus
+			<Inspector
+				{ ...this.props }
+			/>,
+
 			// Show the button markup in the editor
 			<CustomButton { ...this.props }>
 				<RichText
 					tagName="span"
-					placeholder={ __( 'Button text...' ) }
-					isSelected={ isSelected }
+					placeholder={ __( 'Button text...', 'atomic-blocks' ) }
 					keepPlaceholderOnFocus
 					value={ buttonText }
-					formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
+					formattingControls={ [] }
 					className={ classnames(
 						'ab-button',
 						buttonShape,
 						buttonSize,
 					) }
 					style={ {
-						color: buttonTextColor,
-						backgroundColor: buttonBackgroundColor,
+						color: buttonTextColor ? buttonTextColor : '#ffffff',
+						backgroundColor: buttonBackgroundColor ? buttonBackgroundColor : '#3373dc'
 					} }
-					onChange={ (value) => setAttributes( { buttonText: value } ) }
+					onChange={ ( value ) => setAttributes({ buttonText: value }) }
 				/>
 			</CustomButton>,
-			!! this.props.focus && (
+			isSelected && (
 				<form
 					key="form-link"
 					className={ `blocks-button__inline-link ab-button-${buttonAlignment}`}
 					onSubmit={ event => event.preventDefault() }
 					style={ {
-						textAlign: buttonAlignment,
+						textAlign: buttonAlignment
 					} }
 				>
 					<Dashicon icon={ 'admin-links' } />
-					<UrlInput
+					<URLInput
 						className="button-url"
 						value={ buttonUrl }
-						onChange={ ( value ) => setAttributes( { buttonUrl: value } ) }
+						onChange={ ( value ) => setAttributes({ buttonUrl: value }) }
 					/>
 					<IconButton
 						icon="editor-break"
-						label={ __( 'Apply' ) }
+						label={ __( 'Apply', 'atomic-blocks' ) }
 						type="submit"
 					/>
 				</form>
@@ -110,35 +106,33 @@ class ABButtonBlock extends Component {
 
 // Register the block
 registerBlockType( 'atomic-blocks/ab-button', {
-	title: __( 'AB Button' ),
-	description: __( 'Add a customizable button.' ),
+	title: __( 'AB Button', 'atomic-blocks' ),
+	description: __( 'Add a customizable button.', 'atomic-blocks' ),
 	icon: 'admin-links',
-	category: 'common',
+	category: 'atomic-blocks',
 	keywords: [
-		__( 'button' ),
-		__( 'link' ),
-		__( 'atomic' ),
+		__( 'button', 'atomic-blocks' ),
+		__( 'link', 'atomic-blocks' ),
+		__( 'atomic', 'atomic-blocks' )
 	],
 	attributes: {
 		buttonText: {
-			type: 'string',
+			type: 'string'
 		},
 		buttonUrl: {
 			type: 'string',
             source: 'attribute',
             selector: 'a',
-            attribute: 'href',
+            attribute: 'href'
 		},
 		buttonAlignment: {
-			type: 'string',
+			type: 'string'
 		},
 		buttonBackgroundColor: {
-			type: 'string',
-			default: '#3373dc'
+			type: 'string'
 		},
 		buttonTextColor: {
-			type: 'string',
-			default: '#ffffff'
+			type: 'string'
 		},
 		buttonSize: {
 			type: 'string',
@@ -151,40 +145,49 @@ registerBlockType( 'atomic-blocks/ab-button', {
 		buttonTarget: {
 			type: 'boolean',
 			default: false
-		},
+		}
 	},
+
+	ab_settings_data: {
+        ab_button_buttonOptions: {
+            title: __( 'Button Options', 'atomic-blocks' )
+        }
+    },
 
 	// Render the block components
 	edit: ABButtonBlock,
 
 	// Save the attributes and markup
 	save: function( props ) {
-		
+
 		// Setup the attributes
-		const { buttonText, buttonUrl, buttonAlignment, buttonBackgroundColor, buttonTextColor, buttonSize, buttonShape, buttonTarget } = props.attributes;
-		
+		const { buttonText, buttonUrl, buttonBackgroundColor, buttonTextColor, buttonSize, buttonShape, buttonTarget } = props.attributes;
+
 		// Save the block markup for the front end
 		return (
-			<CustomButton { ...props }>			
+			<CustomButton { ...props }>
 				{	// Check if there is button text and output
 					buttonText && (
 					<a
 						href={ buttonUrl }
-						target={ buttonTarget ? '_blank' : '_self' } 
+						target={ buttonTarget ? '_blank' : null }
+						rel={ buttonTarget ? 'noopener noreferrer' : null }
 						className={ classnames(
 							'ab-button',
 							buttonShape,
 							buttonSize,
 						) }
 						style={ {
-							color: buttonTextColor,
-							backgroundColor: buttonBackgroundColor,
+							color: buttonTextColor ? buttonTextColor : '#ffffff',
+							backgroundColor: buttonBackgroundColor ? buttonBackgroundColor : '#3373dc'
 						} }
 					>
-						{ buttonText }
+						<RichText.Content
+							value={ buttonText }
+						/>
 					</a>
-				) }	
+				) }
 			</CustomButton>
 		);
-	},
-} );
+	}
+});

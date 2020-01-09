@@ -3,171 +3,57 @@
  */
 
 // Import block dependencies and components
-import classnames from 'classnames';
-import Inspector from './components/inspector';
-import Testimonial from './components/testimonial';
-import icons from './components/icons';
+import Edit from './components/edit';
+import Save from './components/save';
 
 // Import CSS
 import './styles/style.scss';
 import './styles/editor.scss';
 
 // Internationalization
-const { __ } = wp.i18n; 
+const { __ } = wp.i18n;
 
-// Extend component
-const { Component } = wp.element;
-
-// Register block controls
-const { 
-	registerBlockType,
-	RichText,
-	AlignmentToolbar,
-	BlockControls,
-	BlockAlignmentToolbar,
-	MediaUpload,
-} = wp.blocks;
-
-// Register components
-const {
-	Button,
-	SelectControl,
-} = wp.components;
-
-class ABTestimonialBlock extends Component {
-	
-	render() {
-
-		// Setup the attributes
-		const { attributes: { testimonialName, testimonialTitle, testimonialContent, testimonialAlignment, testimonialImgURL, testimonialImgID, testimonialBackgroundColor, testimonialTextColor, testimonialFontSize, testimonialCiteAlign }, isSelected, className, setAttributes } = this.props;
-
-		return [
-			// Show the alignment toolbar on focus
-			isSelected && (
-				<BlockControls key="controls">
-					<AlignmentToolbar
-						value={ testimonialAlignment }
-						onChange={ ( value ) => this.props.setAttributes( { testimonialAlignment: value } ) }
-					/>
-				</BlockControls>
-			),
-			// Show the block controls on focus
-			isSelected && (
-				<Inspector
-					{ ...this.props }
-				/>
-			),
-			// Show the block markup in the editor
-			<Testimonial { ...this.props }>
-				<RichText
-					tagName="div"
-					multiline="p"
-					placeholder={ __( 'Add testimonial text...' ) }
-					value={ testimonialContent }
-					isSelected={ isSelected }
-					keepPlaceholderOnFocus
-					formattingControls={ [ 'bold', 'italic', 'strikethrough', 'link' ] }
-					className={ classnames(
-						'ab-testimonial-text'
-					) }
-					style={ {
-						textAlign: testimonialAlignment,
-					} }
-					onChange={ ( value ) => this.props.setAttributes( { testimonialContent: value } ) }
-				/>
-
-				<div class="ab-testimonial-info">
-					<div class="ab-testimonial-avatar-wrap">
-						<div class="ab-testimonial-image-wrap">
-							<MediaUpload
-								buttonProps={ {
-									className: 'change-image'
-								} }
-								onSelect={ ( img ) => this.props.setAttributes( 
-									{
-										testimonialImgID: img.id,
-										testimonialImgURL: img.url,
-									}
-								) }
-								type="image"
-								value={ testimonialImgID }
-								render={ ( { open } ) => (
-									<Button onClick={ open }>
-										{ ! testimonialImgID ? icons.upload : <img
-											class="ab-testimonial-avatar"
-											src={ testimonialImgURL }
-											alt="avatar"
-										/>  }
-									</Button>
-								) }
-							>
-							</MediaUpload>
-						</div>	
-					</div>
-
-					<RichText
-						tagName="h2"
-						placeholder={ __( 'Add name' ) }
-						value={ testimonialName }
-						className='ab-testimonial-name'
-						style={ {
-							color: testimonialTextColor
-						} }
-						onChange={ ( value ) => this.props.setAttributes( { testimonialName: value } ) }
-					/>
-					
-					<RichText
-						tagName="small"
-						placeholder={ __( 'Add title' ) }
-						value={ testimonialTitle }
-						className='ab-testimonial-title'
-						style={ {
-							color: testimonialTextColor
-						} }
-						onChange={ ( value ) => this.props.setAttributes( { testimonialTitle: value } ) }
-					/>
-				</div>
-			</Testimonial>	
-		];
-	}
-}
+// Register block
+const { registerBlockType } = wp.blocks;
 
 // Register the block
 registerBlockType( 'atomic-blocks/ab-testimonial', {
-	title: __( 'AB Testimonial' ),
-	description: __( 'Add a user testimonial with a name and title.' ),
+	title: __( 'AB Testimonial', 'atomic-blocks' ),
+	description: __( 'Add a user testimonial with a name and title.', 'atomic-blocks' ),
 	icon: 'format-quote',
-	category: 'common',
+	category: 'atomic-blocks',
 	keywords: [
-		__( 'testimonial' ),
-		__( 'quote' ),
-		__( 'atomic' ),
+		__( 'testimonial', 'atomic-blocks' ),
+		__( 'quote', 'atomic-blocks' ),
+		__( 'atomic', 'atomic-blocks' )
 	],
 	attributes: {
-		testimonialName: { 
-			type: 'string',
+		testimonialName: {
+			type: 'array',
 			selector: '.ab-testimonial-name',
+			source: 'children'
 		},
 		testimonialTitle: {
-			type: 'string',
+			type: 'array',
 			selector: '.ab-testimonial-title',
+			source: 'children'
 		},
 		testimonialContent: {
 			type: 'array',
 			selector: '.ab-testimonial-text',
-			source: 'children',
+			source: 'children'
 		},
 		testimonialAlignment: {
-			type: 'string',
+			type: 'string'
 		},
 		testimonialImgURL: {
 			type: 'string',
 			source: 'attribute',
 			attribute: 'src',
-			selector: 'img',
+			selector: 'img'
 		},
 		testimonialImgID: {
-			type: 'number',
+			type: 'number'
 		},
 		testimonialBackgroundColor: {
 			type: 'string',
@@ -179,70 +65,35 @@ registerBlockType( 'atomic-blocks/ab-testimonial', {
 		},
 		testimonialFontSize: {
 			type: 'number',
-			default: 18,
+			default: 18
 		},
 		testimonialCiteAlign: {
             type: 'string',
-            default: 'left-aligned',
-        },
+            default: 'left-aligned'
+        }
+	},
+	ab_settings_data: {
+		ab_testimonial_testimonialFontSize: {
+			title: __( 'Font Size', 'atomic-blocks' )
+		},
+		ab_testimonial_testimonialCiteAlign: {
+			title: __( 'Cite Alignment', 'atomic-blocks' )
+		},
+		ab_testimonial_testimonialBackgroundColor: {
+			title: __( 'Background Color', 'atomic-blocks' )
+		},
+		ab_testimonial_testimonialTextColor: {
+			title: __( 'Text Color', 'atomic-blocks' )
+		}
 	},
 
-	// Render the block components
-	edit: ABTestimonialBlock,
-
-	// Save the attributes and markup
-	save: function( props ) {
-
-		// Setup the attributes
-		const { testimonialName, testimonialTitle, testimonialContent, testimonialAlignment, testimonialImgURL, testimonialImgID, testimonialBackgroundColor, testimonialTextColor, testimonialFontSize, testimonialCiteAlign } = props.attributes;
-
-		// Save the block markup for the front end
-		return (
-			<Testimonial { ...props }>
-				<div
-				className={ classnames(
-					'ab-testimonial-text',
-				) }
-				style={ {
-					textAlign: testimonialAlignment,
-				} }
-				>
-					{ testimonialContent }
-				</div>
-				
-				<div class="ab-testimonial-info">
-					{ 	// Check if there is an avatar
-						testimonialImgURL && (
-						<div class="ab-testimonial-avatar-wrap">
-							<div class="ab-testimonial-image-wrap">
-								<img
-									class="ab-testimonial-avatar"
-									src={ testimonialImgURL }
-									alt="avatar"
-								/>
-							</div>
-						</div>
-					) }
-
-					{	// Check if there is a testimonial name
-						testimonialName && (
-						<h2 class="ab-testimonial-name"
-							style={ {
-								color: testimonialTextColor
-							} }
-						>{ testimonialName }</h2>
-					) }
-
-					{ 	// Check if there is a testimonial title
-						testimonialTitle && (
-						<small class="ab-testimonial-title"
-							style={ {
-								color: testimonialTextColor
-							} }
-						>{ testimonialTitle }</small>
-					) }
-				</div>
-			</Testimonial>
-		);
+	/* Render the block in the editor. */
+	edit: props => {
+		return <Edit { ...props } />;
 	},
-} );
+
+	/* Save the block markup. */
+	save: props => {
+		return <Save { ...props } />;
+	}
+});

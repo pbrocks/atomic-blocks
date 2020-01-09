@@ -1,31 +1,36 @@
 /**
- * Inspector Controls
+ * Inspector Controls.
  */
 
-// Setup the block
+/**
+ * Internal dependencies.
+ */
+import RenderSettingControl from '../../../utils/components/settings/renderSettingControl';
+
+/**
+ * Setup the block.
+ */
 const { __ } = wp.i18n;
 const { Component } = wp.element;
 
-// Import block components
+/**
+ * Import block dependencies.
+ */
 const {
-  InspectorControls,
-  BlockDescription,
-  ColorPalette,
-} = wp.blocks;
+  InspectorControls
+} = wp.editor;
 
-// Import Inspector components
+/**
+ * Import Inspector components.
+ */
 const {
-	Toolbar,
-	Button,
 	PanelBody,
-	PanelRow,
-	PanelColor,
 	RangeControl,
-	ToggleControl,
+	ToggleControl
 } = wp.components;
 
 /**
- * Create an Inspector Controls wrapper Component
+ * Create an Inspector Controls wrapper Component.
  */
 export default class Inspector extends Component {
 
@@ -35,28 +40,29 @@ export default class Inspector extends Component {
 
 	render() {
 
-		// Setup the attributes
-		const { accordionTitle, accordionText, accordionFontSize, accordionOpen } = this.props.attributes;
-
 		return (
-		<InspectorControls key="inspector">
+			<InspectorControls key="inspector">
+				<PanelBody>
+					<RenderSettingControl id="ab_accordion_accordionFontSize">
+						<RangeControl
+							label={ __( 'Title Font Size', 'atomic-blocks' ) }
+							value={ this.props.attributes.accordionFontSize }
+							onChange={ ( value ) => this.props.setAttributes({ accordionFontSize: value }) }
+							min={ 14 }
+							max={ 24 }
+							step={ 1 }
+						/>
+					</RenderSettingControl>
 
-			<RangeControl
-				label={ __( 'Font Size' ) }
-				value={ accordionFontSize }
-				onChange={ ( value ) => this.props.setAttributes( { accordionFontSize: value } ) }
-				min={ 14 }
-				max={ 24 }
-				step={ 1 }
-			/>
-
-			<ToggleControl
-				label={ __( 'Open by default' ) }
-				checked={ accordionOpen }
-				onChange={ () => this.props.setAttributes( { accordionOpen: ! accordionOpen } ) }
-			/>
-
-		</InspectorControls>
+					<RenderSettingControl id="ab_accordion_accordionOpen">
+						<ToggleControl
+							label={ __( 'Open by default', 'atomic-blocks' ) }
+							checked={ this.props.attributes.accordionOpen }
+							onChange={ () => this.props.setAttributes({ accordionOpen: ! this.props.attributes.accordionOpen }) }
+						/>
+					</RenderSettingControl>
+				</PanelBody>
+			</InspectorControls>
 		);
 	}
 }

@@ -2,28 +2,21 @@
  * Inspector Controls
  */
 
+// Import Inspector settings
+import ButtonSettings from './../../../utils/inspector/button';
+
 // Setup the block
 const { __ } = wp.i18n;
 const { Component } = wp.element;
 
 // Import block components
 const {
-  InspectorControls,
-  BlockDescription,
-  ColorPalette,
-} = wp.blocks;
+  InspectorControls
+} = wp.editor;
 
 // Import Inspector components
 const {
-	Toolbar,
-	Button,
-	PanelBody,
-	PanelRow,
-	PanelColor,
-	FormToggle,
-	RangeControl, 
-	SelectControl,
-	ToggleControl,
+	PanelBody
 } = wp.components;
 
 /**
@@ -38,78 +31,43 @@ export default class Inspector extends Component {
 	render() {
 
 		// Setup the attributes
-		const { buttonText, buttonUrl, buttonAlignment, buttonBackgroundColor, buttonTextColor, buttonSize, buttonShape, buttonTarget } = this.props.attributes;
-
-		// Button size values
-		const buttonSizeOptions = [
-			{ value: 'ab-button-size-small', label: __( 'Small' ) },
-			{ value: 'ab-button-size-medium', label: __( 'Medium' ) },
-			{ value: 'ab-button-size-large', label: __( 'Large' ) },
-			{ value: 'ab-button-size-extralarge', label: __( 'Extra Large' ) },
-		];
-
-		// Button shape
-		const buttonShapeOptions = [
-			{ value: 'ab-button-shape-square', label: __( 'Square' ) },
-			{ value: 'ab-button-shape-rounded', label: __( 'Rounded Square' ) },
-			{ value: 'ab-button-shape-circular', label: __( 'Circular' ) },
-		];
+		const {
+			buttonBackgroundColor,
+			buttonTextColor,
+			buttonSize,
+			buttonShape,
+			buttonTarget
+		} = this.props.attributes;
+		const { setAttributes } = this.props;
 
 		return (
 		<InspectorControls key="inspector">
+			<PanelBody>
+				<ButtonSettings
 
-			<ToggleControl
-				label={ __( 'Open link in new window' ) }
-				checked={ buttonTarget }
-				onChange={ () => this.props.setAttributes( { buttonTarget: ! buttonTarget } ) }
-			/>
+					// Open in new window
+					buttonTarget={ buttonTarget }
+					onChangeButtonTarget={ value =>
+						setAttributes({ buttonTarget: ! buttonTarget })
+					}
 
-			<SelectControl
-				label={ __( 'Button Size' ) }
-				value={ buttonSize }
-				options={ buttonSizeOptions.map( ({ value, label }) => ( {
-					value: value,
-					label: label,
-				} ) ) }
-				onChange={ ( value ) => { this.props.setAttributes( { buttonSize: value } ) } }
-			/>
+					// Button Size
+					buttonSize={ buttonSize }
+					onChangeButtonSize={ buttonSize => setAttributes({ buttonSize }) }
 
-			<SelectControl
-				label={ __( 'Button Shape' ) }
-				value={ buttonShape }
-				options={ buttonShapeOptions.map( ({ value, label }) => ( {
-					value: value,
-					label: label,
-				} ) ) }
-				onChange={ ( value ) => { this.props.setAttributes( { buttonShape: value } ) } }
-			/>
-			
-			<PanelColor 
-				title={ __( 'Button Color' ) }
-				colorValue={ buttonBackgroundColor }
-				initialOpen={ false }
-			>
-				<ColorPalette 
-					label={ __( 'Button Color' ) }
-					value={ buttonBackgroundColor }
-					onChange={ ( value ) => { this.props.setAttributes( { buttonBackgroundColor: value } ) } }
-					colors={['#00d1b2', '#3373dc', '#209cef', '#22d25f', '#ffdd57', '#ff3860', '#7941b6', '#444048']}
+					// Button Shape
+					buttonShape={ buttonShape }
+					onChangeButtonShape={ buttonShape => setAttributes({ buttonShape }) }
+
+					// Button color
+					buttonBackgroundColor={ buttonBackgroundColor }
+					onChangeButtonColor={ buttonBackgroundColor => setAttributes({ buttonBackgroundColor }) }
+
+					// Button text color
+					buttonTextColor={ buttonTextColor }
+					onChangeButtonTextColor={ buttonTextColor => setAttributes({ buttonTextColor }) }
 				/>
-			</PanelColor>
-			
-			<PanelColor 
-				title={ __( 'Button Text Color' ) }
-				colorValue={ buttonTextColor }
-				initialOpen={ false }
-			>
-				<ColorPalette 
-					label={ __( 'Button Text Color' ) }
-					value={ buttonTextColor }
-					onChange={ ( value ) => { this.props.setAttributes( { buttonTextColor: value } ) } }
-					colors={['#32373c', '#fff' ]}
-				/>
-			</PanelColor>
-
+			</PanelBody>
 		</InspectorControls>
 		);
 	}

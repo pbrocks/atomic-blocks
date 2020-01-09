@@ -3,143 +3,80 @@
  */
 
 // Import block dependencies and components
-import classnames from 'classnames';
-import Inspector from './components/inspector';
-import Accordion from './components/accordion';
-import icons from './components/icons';
+import Edit from './components/edit';
+import Save from './components/save';
+import Deprecated from './deprecated/deprecated';
 
 // Import CSS
 import './styles/style.scss';
 import './styles/editor.scss';
 
 // Components
-const { __ } = wp.i18n; 
+const { __ } = wp.i18n;
 
 // Extend component
 const { Component } = wp.element;
 
-// Register block controls
-const { 
-	registerBlockType,
-	RichText,
-	AlignmentToolbar,
-	BlockControls,
-	BlockAlignmentToolbar,
+// Register block
+const {
+	registerBlockType
 } = wp.blocks;
 
-// Register components
-const {
-	Button,
-	withFallbackStyles,
-	IconButton,
-	Dashicon,
-} = wp.components;
-
-class ABAccordionBlock extends Component {
-	
-	render() {
-
-		// Setup the attributes
-		const { attributes: { accordionTitle, accordionText, accordionAlignment, accordionFontSize, accordionOpen }, isSelected, className, setAttributes } = this.props;
-
-		return [
-			// Show the block alignment controls on focus
-			isSelected && (
-				<BlockControls key="controls">
-					<AlignmentToolbar
-						value={ accordionAlignment }
-						onChange={ ( value ) => this.props.setAttributes( { accordionAlignment: value } ) }
-					/>
-				</BlockControls>
-			),
-			// Show the block controls on focus
-			isSelected && (
-				<Inspector
-					{ ...this.props }
-				/>
-			),
-			// Show the button markup in the editor
-			<Accordion { ...this.props }>
-				<RichText
-					tagName="p"
-					placeholder={ __( 'Accordion Title' ) }
-					value={ accordionTitle }
-					className='ab-accordion-title'
-					onChange={ ( value ) => this.props.setAttributes( { accordionTitle: value } ) }
-				/>
-				
-				<RichText
-					tagName="p"
-					placeholder={ __( 'Accordion Text' ) }
-					value={ accordionText }
-					isSelected={ isSelected }
-					keepPlaceholderOnFocus
-					formattingControls={ [ 'bold', 'italic', 'strikethrough', 'link' ] }
-					className='ab-accordion-text'
-					onChange={ ( value ) => this.props.setAttributes( { accordionText: value } ) }
-				/>
-			</Accordion>
-		];
+const blockAttributes = {
+	accordionTitle: {
+		type: 'array',
+		selector: '.ab-accordion-title',
+		source: 'children'
+	},
+	accordionText: {
+		type: 'array',
+		selector: '.ab-accordion-text',
+		source: 'children'
+	},
+	accordionAlignment: {
+		type: 'string'
+	},
+	accordionFontSize: {
+		type: 'number',
+		default: undefined
+	},
+	accordionOpen: {
+		type: 'boolean',
+		default: false
 	}
-}
+};
 
 // Register the block
 registerBlockType( 'atomic-blocks/ab-accordion', {
-	title: __( 'AB Accordion' ),
-	description: __( 'Add accordion block with a title and text.' ),
+	title: __( 'AB Accordion', 'atomic-blocks' ),
+	description: __( 'Add accordion block with a title and text.', 'atomic-blocks' ),
 	icon: 'editor-ul',
-	category: 'common',
+	category: 'atomic-blocks',
 	keywords: [
-		__( 'accordion' ),
-		__( 'list' ),
-		__( 'atomic' ),
+		__( 'accordion', 'atomic-blocks' ),
+		__( 'list', 'atomic-blocks' ),
+		__( 'atomic', 'atomic-blocks' )
 	],
-	attributes: {
-		accordionTitle: {
-			type: 'string',
-		},
-		accordionText: {
-			type: 'array',
-			selector: '.ab-accordion-text',
-			source: 'children',
-		},
-		accordionAlignment: {
-			type: 'string',
-		},
-		accordionFontSize: {
-			type: 'number',
-			default: 18
-		},
-		accordionOpen: {
-			type: 'boolean',
-			default: false
-		},
-	},
+	attributes: blockAttributes,
+
+	ab_settings_data: {
+        ab_accordion_accordionFontSize: {
+            title: __( 'Title Font Size', 'atomic-blocks' )
+        },
+        ab_accordion_accordionOpen: {
+            title: __( 'Open by default', 'atomic-blocks' )
+        }
+    },
 
 	// Render the block components
-	edit: ABAccordionBlock,
+	edit: props => {
+		return <Edit { ...props } />;
+	},
 
 	// Save the attributes and markup
-	save: function( props ) {
-		
-		// Setup the attributes
-		const { accordionTitle, accordionText, accordionAlignment, accordionFontSize, accordionOpen } = props.attributes;
-		
-		// Save the block markup for the front end
-		return (
-			<Accordion { ...props }>	
-				<details open={accordionOpen}>
-				{ 	// Check if there is an accordion title
-					accordionTitle && (
-						<summary class="ab-accordion-title"><p>{ accordionTitle }</p></summary>
-				) }
-
-				{	// Check if there is accordion text
-					accordionText && (
-					<p class="ab-accordion-text">{ accordionText }</p>
-				) }
-				</details>
-			</Accordion>
-		);
+	save: props => {
+		return <Save { ...props } />;
 	},
-} );
+
+	deprecated: Deprecated
+});

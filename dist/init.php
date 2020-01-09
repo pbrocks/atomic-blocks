@@ -4,7 +4,7 @@
  *
  * Enqueue CSS/JS of all the blocks.
  *
- * @since 	1.0.0
+ * @since   1.0.0
  * @package Atomic Blocks
  */
 
@@ -19,24 +19,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.0.0
  */
 function atomic_blocks_block_assets() {
-	
-	// Load the compiled styles
-	wp_enqueue_style(
+
+	// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison -- Could be true or 'true'.
+	$postfix = ( SCRIPT_DEBUG == true ) ? '' : '.min';
+
+	// Load the compiled styles.
+	wp_register_style(
 		'atomic-blocks-style-css',
 		plugins_url( 'dist/blocks.style.build.css', dirname( __FILE__ ) ),
-		array( 'wp-blocks' ),
+		array(),
 		filemtime( plugin_dir_path( __FILE__ ) . 'blocks.style.build.css' )
 	);
 
-	// Load the FontAwesome icon library
+	// Load the FontAwesome icon library.
 	wp_enqueue_style(
 		'atomic-blocks-fontawesome',
-		plugins_url( 'dist/assets/fontawesome/css/fontawesome-all.css', dirname( __FILE__ ) ),
-		array( 'wp-blocks' ),
-		filemtime( plugin_dir_path( __FILE__ ) . 'assets/fontawesome/css/fontawesome-all.css' )
+		plugins_url( 'dist/assets/fontawesome/css/all' . $postfix . '.css', dirname( __FILE__ ) ),
+		array(),
+		filemtime( plugin_dir_path( __FILE__ ) . 'assets/fontawesome/css/all.css' )
 	);
-} 
-add_action( 'enqueue_block_assets', 'atomic_blocks_block_assets' );
+}
+add_action( 'init', 'atomic_blocks_block_assets' );
 
 
 /**
@@ -46,28 +49,46 @@ add_action( 'enqueue_block_assets', 'atomic_blocks_block_assets' );
  */
 function atomic_blocks_editor_assets() {
 
-	// Load the compiled blocks into the editor
+	// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison -- Could be true or 'true'.
+	$postfix = ( SCRIPT_DEBUG == true ) ? '' : '.min';
+
+	// Load the compiled blocks into the editor.
 	wp_enqueue_script(
 		'atomic-blocks-block-js',
 		plugins_url( '/dist/blocks.build.js', dirname( __FILE__ ) ),
-		array( 'wp-blocks', 'wp-i18n', 'wp-element' ),
-		filemtime( plugin_dir_path( __FILE__ ) . 'blocks.build.js' )
+		array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-components', 'wp-editor' ),
+		filemtime( plugin_dir_path( __FILE__ ) . 'blocks.build.js' ),
+		true
 	);
 
-	// Load the compiled styles into the editor
+	// Load the compiled styles into the editor.
 	wp_enqueue_style(
 		'atomic-blocks-block-editor-css',
-		plugins_url( 'dist/blocks.editor.build.css', dirname( __FILE__ ) ), 
+		plugins_url( 'dist/blocks.editor.build.css', dirname( __FILE__ ) ),
 		array( 'wp-edit-blocks' ),
 		filemtime( plugin_dir_path( __FILE__ ) . 'blocks.editor.build.css' )
 	);
 
-	// Pass in REST URL
+	// Load the FontAwesome icon library.
+	wp_enqueue_style(
+		'atomic-blocks-fontawesome',
+		plugins_url( 'dist/assets/fontawesome/css/all' . $postfix . '.css', dirname( __FILE__ ) ),
+		array(),
+		filemtime( plugin_dir_path( __FILE__ ) . 'assets/fontawesome/css/all.css' )
+	);
+
+	$user_data = wp_get_current_user();
+	unset( $user_data->user_pass, $user_data->user_email );
+
+	// Pass in REST URL.
 	wp_localize_script(
 		'atomic-blocks-block-js',
 		'atomic_globals',
-		array( 
-			'rest_url' => esc_url( rest_url() )
+		array(
+			'rest_url'      => esc_url( rest_url() ),
+			'user_data'     => $user_data,
+			'pro_activated' => function_exists( '\AtomicBlocksPro\plugin_loader' ),
+			'is_wpe'        => function_exists( 'is_wpe' ),
 		)
 	);
 }
@@ -80,67 +101,53 @@ add_action( 'enqueue_block_editor_assets', 'atomic_blocks_editor_assets' );
  * @since 1.0.0
  */
 function atomic_blocks_frontend_assets() {
-	// Load the dismissable notice js
+
+	if ( function_exists( 'is_amp_endpoint' ) && is_amp_endpoint() ) {
+		return;
+	}
+
+	// Load the dismissible notice js.
 	wp_enqueue_script(
 		'atomic-blocks-dismiss-js',
 		plugins_url( '/dist/assets/js/dismiss.js', dirname( __FILE__ ) ),
-		array( 'wp-blocks' ),
-		filemtime( plugin_dir_path( __FILE__ ) . '/assets/js/dismiss.js' )
+		array(),
+		filemtime( plugin_dir_path( __FILE__ ) . '/assets/js/dismiss.js' ),
+		true
 	);
 }
 add_action( 'wp_enqueue_scripts', 'atomic_blocks_frontend_assets' );
 
-
-// Add template to testimonial post type
-function atomic_blocks_testimonial_templates( $args, $post_type ) {
-
-	if ( 'atomic-testimonial' == $post_type ) {
-		// Lock the template
-		$args['template_lock'] = true;
-		
-		// Setup the template
-		$args['template'] = [
+add_filter( 'block_categories', 'atomic_blocks_add_custom_block_category' );
+/**
+ * Adds the Atomic Blocks block category.
+ *
+ * @param array $categories Existing block categories.
+ *
+ * @return array Updated block categories.
+ */
+function atomic_blocks_add_custom_block_category( $categories ) {
+	return array_merge(
+		$categories,
+		array(
 			array(
-				'atomic/atomic-testimonial'
-			)
-		];
-	}
-	return $args;
-}
-add_filter( 'register_post_type_args', 'atomic_blocks_testimonial_templates', 20, 2 );
-
-
-// Render the testimonial posts for the frontend
-function atomic_blocks_testimonial_list_render( $attributes ) {
-
-    $posts = (array) wp_get_recent_posts( array(
-        'numberposts' => 5,
-        'post_status' => 'publish',
-    ) );
-
-    if ( count( $posts ) === 0 ) {
-        return __( 'No posts', 'atomic-blocks' );
-    }
-
-    $markup = '<ul>';
-    foreach( $posts as $post ) {
-
-	$markup .= sprintf(
-		'<li><a class="atomic-blocks-latest-post" href="%1$s">%2$s</a></li>',
-		esc_url( get_permalink( $post['ID'] ) ),
-		esc_html( get_the_title( $post['ID'] ) )
+				'slug'  => 'atomic-blocks',
+				'title' => __( 'Atomic Blocks', 'atomic-blocks' ),
+			),
+		)
 	);
-
-    }
-
-    return $markup;
 }
 
+/**
+ * Enqueue assets for settings page.
+ *
+ * @since 2.1.0
+ */
+function atomic_blocks_settings_enqueue() {
 
-// Hook the post rendering to the block
-if ( function_exists( 'register_block_type' ) ) :
-	// Hook a render function to the testimonial block
-	register_block_type( 'atomic/atomic-testimonial-list', array(
-		'render_callback' => 'atomic_blocks_testimonial_list_render',
-	) );
-endif;
+	if ( 'atomic-blocks_page_atomic-blocks-plugin-settings' === get_current_screen()->base ) {
+		wp_register_style( 'atomic-blocks-getting-started', plugins_url( 'dist/getting-started/getting-started.css', __DIR__ ), false, '1.0.0' );
+		wp_enqueue_style( 'atomic-blocks-getting-started' );
+
+	}
+}
+add_action( 'admin_enqueue_scripts', 'atomic_blocks_settings_enqueue' );

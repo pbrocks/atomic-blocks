@@ -2,6 +2,8 @@
  * Inspector Controls
  */
 
+import RenderSettingControl from '../../../utils/components/settings/renderSettingControl';
+
 // Setup the block
 const { __ } = wp.i18n;
 const { Component } = wp.element;
@@ -9,20 +11,14 @@ const { Component } = wp.element;
 // Import block components
 const {
 	InspectorControls,
-	BlockDescription,
-	ColorPalette,
-} = wp.blocks;
+	PanelColorSettings
+} = wp.editor;
 
 // Import Inspector components
 const {
-	Toolbar,
-	Button,
 	PanelBody,
-	PanelRow,
-	PanelColor,
-	FormToggle,
-	RangeControl, 
-	SelectControl,
+	RangeControl,
+	SelectControl
 } = wp.components;
 
 /**
@@ -38,57 +34,65 @@ export default class Inspector extends Component {
 
 		// Cite Alignment Options
 		const citeAlignOptions = [
-			{ value: 'left-aligned', label: __( 'Left Aligned' ) },
-			{ value: 'right-aligned', label: __( 'Right Aligned' ) },
+			{ value: 'left-aligned', label: __( 'Left Aligned', 'atomic-blocks' ) },
+			{ value: 'right-aligned', label: __( 'Right Aligned', 'atomic-blocks' ) }
 		];
 
 		// Setup the attributes
-		const { attributes: { testimonialName, testimonialTitle, testimonialContent, testimonialAlignment, testimonialImgURL, testimonialImgID, testimonialBackgroundColor, testimonialTextColor, testimonialFontSize, testimonialCiteAlign }, isSelected, className, setAttributes } = this.props;
+		const { attributes: { testimonialBackgroundColor, testimonialTextColor, testimonialFontSize, testimonialCiteAlign }, setAttributes } = this.props;
+
+		// Update color values
+		const onChangeBackgroundColor = value => setAttributes({ testimonialBackgroundColor: value });
+		const onChangeTextColor = value => setAttributes({ testimonialTextColor: value });
 
 		return (
 		<InspectorControls key="inspector">
+			<PanelBody>
+				<RenderSettingControl id="ab_testimonial_testimonialFontSize">
+					<RangeControl
+						label={ __( 'Font Size', 'atomic-blocks' ) }
+						value={ testimonialFontSize }
+						onChange={ ( value ) => this.props.setAttributes({ testimonialFontSize: value }) }
+						min={ 14 }
+						max={ 24 }
+						step={ 1 }
+					/>
+				</RenderSettingControl>
+				<RenderSettingControl id="ab_testimonial_testimonialCiteAlign">
+					<SelectControl
+						label={ __( 'Cite Alignment', 'atomic-blocks' ) }
+						description={ __( 'Left or right align the cite name and title.', 'atomic-blocks' ) }
+						options={ citeAlignOptions }
+						value={ testimonialCiteAlign }
+						onChange={ ( value ) => this.props.setAttributes({ testimonialCiteAlign: value }) }
+					/>
+				</RenderSettingControl>
+			</PanelBody>
+			<RenderSettingControl id="ab_testimonial_testimonialBackgroundColor">
+				<PanelColorSettings
+					title={ __( 'Background Color', 'atomic-blocks' ) }
+					initialOpen={ false }
+					colorSettings={ [ {
+						value: testimonialBackgroundColor,
+						onChange: onChangeBackgroundColor,
+						label: __( 'Background Color', 'atomic-blocks' )
+					} ] }
+				>
+				</PanelColorSettings>
+			</RenderSettingControl>
 
-			<RangeControl
-				label={ __( 'Font Size' ) }
-				value={ testimonialFontSize }
-				onChange={ ( value ) => this.props.setAttributes( { testimonialFontSize: value } ) }
-				min={ 14 }
-				max={ 24 }
-				step={ 1 }
-			/>
-
-			<SelectControl
-				label={ __( 'Cite Alignment' ) }
-				description={ __( 'Left or right align the cite name and title.' ) }
-				options={ citeAlignOptions }
-				value={ testimonialCiteAlign }
-				onChange={ ( value ) => this.props.setAttributes( { testimonialCiteAlign: value } ) }
-			/>
-			
-			<PanelColor 
-				title={ __( 'Background Color' ) }
-				colorValue={ testimonialBackgroundColor }
-				initialOpen={ false }
-			>
-				<ColorPalette 
-					label={ __( 'Background Color' ) }
-					value={ testimonialBackgroundColor }
-					onChange={ ( value ) => this.props.setAttributes( { testimonialBackgroundColor: value } ) }
-				/>
-			</PanelColor>
-
-			<PanelColor 
-				title={ __( 'Text Color' ) }
-				colorValue={ testimonialTextColor }
-				initialOpen={ false }
-			>
-				<ColorPalette 
-					label={ __( 'Background Color' ) }
-					value={ testimonialTextColor }
-					onChange={ ( value ) => this.props.setAttributes( { testimonialTextColor: value } ) }
-				/>
-			</PanelColor>
-
+			<RenderSettingControl id="ab_testimonial_testimonialTextColor">
+				<PanelColorSettings
+					title={ __( 'Text Color', 'atomic-blocks' ) }
+					initialOpen={ false }
+					colorSettings={ [ {
+						value: testimonialTextColor,
+						onChange: onChangeTextColor,
+						label: __( 'Text Color', 'atomic-blocks' )
+					} ] }
+				>
+				</PanelColorSettings>
+			</RenderSettingControl>
 		</InspectorControls>
 		);
 	}
